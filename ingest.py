@@ -1,7 +1,15 @@
 import os
+import ollama
+import chromadb
 
+# Constants
 DOCS_DIR = "docs"
 
+# Initialize ChromaDB client and collection
+client = chromadb.PersistentClient(path="db")
+collection = client.get_or_create_collection("docs")
+
+# Retrieve documents from the docs directory
 def load_docs():
     docs = {}
     for filename in os.listdir(DOCS_DIR):
@@ -11,15 +19,31 @@ def load_docs():
                 docs[filename] = f.read()
     return docs
 
-if __name__ == "__main__":
-    docs = load_docs()
-    for filename, content in docs.items():
-        print(f"{filename}: {len(content)} chars")
-
+# Chunk text into paragraphs
 def chunk_text(text):
     paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
     return paragraphs
 
-print(chunk_text(docs["Test Note 1.txt"]))
+# Embed text using the Ollama embeddings model
+def embed(text):
+    response = ollama.embeddings(model="nomic-embed-text", prompt=text)
+    return response["embedding"]
 
-print(chunk_text(docs["Test Note 3.txt"]))
+# Ingest documents into the database
+def ingest():
+    docs = load_docs()
+    chunk_id = 0
+    for filename, content in docs.items():
+        chunks = chunk_text(content)
+        for chunk in chunks:
+            collection.add(
+                ids=[str(chunk_id)],
+                embeddings=[embed(chunk)],
+                documents=[chunk],
+                metadatas=[{"filename": filename}],
+            )
+            chunk_id += 1
+        print(f"Ingested {chunk_id} chunks from {len(docs)} docs.")
+
+if __name__ == "__main__":
+    ingest()
