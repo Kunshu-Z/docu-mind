@@ -15,3 +15,11 @@ if __name__ == "__main__":
     docs = load_docs()
     for filename, content in docs.items():
         print(f"{filename}: {len(content)} chars")
+
+def chunk_text(text):
+    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+    return paragraphs
+
+print(chunk_text(docs["Test Note 1.txt"]))
+
+print(chunk_text(docs["Test Note 3.txt"]))
