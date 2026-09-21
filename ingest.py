@@ -21,8 +21,7 @@ def load_docs():
 
 # Chunk text into paragraphs
 def chunk_text(text):
-    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
-    return paragraphs
+    return[text.strip()]
 
 # Embed text using the Ollama embeddings model
 def embed(text):

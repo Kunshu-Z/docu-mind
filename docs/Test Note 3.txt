@@ -1,3 +1,7 @@
 Test note number 3
 
 This is the body text of the test note.
+
+This note is about bananas.
+
+I like to read books on the beach.
